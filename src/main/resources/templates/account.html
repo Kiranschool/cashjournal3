@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cash Journal - Account & Settings</title>
+    <style>
+        :root {
+            --primary-purple: #6200EA;
+            --light-purple: #B388FF;
+            --dark-purple: #4A148C;
+            --hover-purple: #7C4DFF;
+            --bg-purple: #F3E5F5;
+            --text-purple: #4A148C;
+        }
+
+        body {
+            background-color: var(--bg-purple);
+            color: var(--text-purple);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .nav-bar {
+            background-color: var(--primary-purple);
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(98, 0, 234, 0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-bar a:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .nav-bar a.active {
+            background-color: var(--dark-purple);
+        }
+
+        .logout-btn {
+            float: right;
+            background-color: var(--dark-purple);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #7B1FA2;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .account-header {
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+            text-align: center;
+        }
+
+        .account-title {
+            color: var(--dark-purple);
+            margin: 0 0 10px 0;
+        }
+
+        .account-subtitle {
+            color: var(--text-purple);
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .settings-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--light-purple);
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .settings-section h3 {
+            color: var(--dark-purple);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-section h3 i {
+            font-size: 1.2em;
+            color: var(--primary-purple);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: var(--text-purple);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--light-purple);
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 5px rgba(98, 0, 234, 0.2);
+        }
+
+        .save-btn {
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .save-btn:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .notification-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: var(--bg-purple);
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .notification-toggle:hover {
+            background-color: var(--light-purple);
+            color: white;
+        }
+
+        .notification-toggle input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .currency-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--light-purple);
+            border-radius: 4px;
+            background-color: white;
+            color: var(--text-purple);
+        }
+
+        .danger-zone {
+            background-color: #FFF5F5;
+            border: 1px solid #FF8A80;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .danger-zone h4 {
+            color: #D32F2F;
+            margin-top: 0;
+        }
+
+        .delete-btn {
+            background-color: #D32F2F;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background-color: #B71C1C;
+        }
+
+        .success-message {
+            display: none;
+            color: #28a745;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            display: none;
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="nav-bar">
+        <a th:href="@{/home}">Home</a>
+        <a th:href="@{/finance-calendar-journal}">Finance Calendar Journal</a>
+        <a th:href="@{/wishlist}">My Wishlist</a>
+        <a th:href="@{/spending-tracker}">Spending Tracker</a>
+        <a th:href="@{/account}" class="active">Account & Settings</a>
+        <form id="logoutForm" th:action="@{/logout}" method="post" style="display: inline;" onsubmit="return confirmLogout()">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="main-content">
+        <div class="account-header">
+            <h2 class="account-title">Welcome, <span th:text="${firstName}">User</span>!</h2>
+            <p class="account-subtitle">Manage your account settings and preferences</p>
+        </div>
+
+        <div id="success-message" class="success-message"></div>
+        <div id="error-message" class="error-message"></div>
+
+        <div class="settings-container">
+            <div class="settings-section">
+                <h3><i class="fas fa-user"></i> Profile Information</h3>
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="firstName" th:value="${firstName}" />
+                </div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" th:value="${username}" readonly/>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" th:value="${email}" />
+                </div>
+                <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-cog"></i> Preferences</h3>
+                <div class="form-group">
+                    <label>Currency</label>
+                    <select class="currency-select">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                    </select>
+                </div>
+                <div class="notification-toggle">
+                    <input type="checkbox" id="email-notifications" />
+                    <label for="email-notifications">Email Notifications</label>
+                </div>
+                <div class="notification-toggle">
+                    <input type="checkbox" id="budget-alerts" />
+                    <label for="budget-alerts">Budget Alerts</label>
+                </div>
+                <div class="notification-toggle">
+                    <input type="checkbox" id="savings-reminders" />
+                    <label for="savings-reminders">Savings Reminders</label>
+                </div>
+                <button class="save-btn" onclick="savePreferences()">Save Preferences</button>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-lock"></i> Security</h3>
+                <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" name="current-password" />
+                </div>
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" name="new-password" />
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" />
+                </div>
+                <button class="save-btn" onclick="updatePassword()">Update Password</button>
+
+                <div class="danger-zone">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Danger Zone</h4>
+                    <p>Once you delete your account, there is no going back. Please be certain.</p>
+                    <button class="delete-btn" onclick="confirmDelete()">Delete Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showMessage(message, isError = false) {
+            const successDiv = document.getElementById('success-message');
+            const errorDiv = document.getElementById('error-message');
+            
+            if (isError) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                successDiv.style.display = 'none';
+            } else {
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+            }
+
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        async function saveProfile() {
+            try {
+                // TODO: Implement profile update
+                showMessage('Profile updated successfully!');
+            } catch (error) {
+                showMessage('Failed to update profile. Please try again.', true);
+            }
+        }
+
+        async function savePreferences() {
+            try {
+                // TODO: Implement preferences update
+                showMessage('Preferences saved successfully!');
+            } catch (error) {
+                showMessage('Failed to save preferences. Please try again.', true);
+            }
+        }
+
+        async function updatePassword() {
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                showMessage('New passwords do not match!', true);
+                return;
+            }
+
+            try {
+                // TODO: Implement password update
+                showMessage('Password updated successfully!');
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+            } catch (error) {
+                showMessage('Failed to update password. Please try again.', true);
+            }
+        }
+
+        function confirmDelete() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                // TODO: Implement account deletion
+                showMessage('Account deletion initiated...', true);
+            }
+        }
+
+        function confirmLogout() {
+            return confirm('Are you sure you want to logout?');
+        }
+    </script>
+</body>
+</html> 

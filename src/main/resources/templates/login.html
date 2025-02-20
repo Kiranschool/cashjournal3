@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cash Journal - Login</title>
+    <style>
+        :root {
+            --primary-purple: #6200EA;
+            --light-purple: #B388FF;
+            --dark-purple: #4A148C;
+            --hover-purple: #7C4DFF;
+            --bg-purple: #F3E5F5;
+            --text-purple: #4A148C;
+        }
+
+        body {
+            background-color: var(--bg-purple);
+            color: var(--text-purple);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 400px;
+            padding: 30px;
+            background-color: white;
+            border: 1px solid var(--light-purple);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+        }
+
+        .container:hover {
+            box-shadow: 0 0 20px rgba(98, 0, 234, 0.15);
+            transition: box-shadow 0.3s ease;
+        }
+
+        h2 {
+            color: var(--dark-purple);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            color: var(--text-purple);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        label {
+            display: block;
+            color: var(--text-purple);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .input-hint {
+            font-size: 0.85em;
+            color: var(--text-purple);
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--light-purple);
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 5px rgba(98, 0, 234, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-purple);
+        }
+
+        .signup-link a {
+            color: var(--primary-purple);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .signup-link a:hover {
+            color: var(--hover-purple);
+        }
+
+        .success {
+            color: #28a745;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+            color: var(--text-purple);
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        .forgot-password a {
+            color: var(--primary-purple);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: var(--hover-purple);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <div th:if="${param.error}" class="error" style="display: block;">
+            Invalid username/email or password
+        </div>
+        <div th:if="${param.registered}" class="success" style="display: block;">
+            Account created successfully! Please login.
+        </div>
+        <form th:action="@{/api/auth/login}" method="post">
+            <div class="form-group">
+                <label for="usernameOrEmail">Username or Email</label>
+                <input type="text" id="usernameOrEmail" name="usernameOrEmail" required autofocus/>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required/>
+            </div>
+            <div class="checkbox-container">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="remember-me"/>
+                    Remember me
+                </label>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <div class="signup-link">
+            Don't have an account? <a th:href="@{/signup}">Sign up here</a>
+        </div>
+    </div>
+</body>
+</html> 

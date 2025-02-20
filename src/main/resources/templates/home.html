@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cash Journal - Home</title>
+    <style>
+        :root {
+            --primary-purple: #6200EA;
+            --light-purple: #B388FF;
+            --dark-purple: #4A148C;
+            --hover-purple: #7C4DFF;
+            --bg-purple: #F3E5F5;
+            --text-purple: #4A148C;
+        }
+
+        body {
+            background-color: var(--bg-purple);
+            color: var(--text-purple);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .nav-bar {
+            background-color: var(--primary-purple);
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(98, 0, 234, 0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-bar a:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .nav-bar a.active {
+            background-color: var(--dark-purple);
+        }
+
+        .logout-btn {
+            float: right;
+            background-color: var(--dark-purple);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #7B1FA2;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .welcome-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+        }
+
+        .welcome-section h1 {
+            color: var(--dark-purple);
+            margin: 0 0 10px 0;
+        }
+
+        .welcome-section p {
+            color: var(--text-purple);
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .action-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .action-card h3 {
+            color: var(--dark-purple);
+            margin: 0 0 10px 0;
+        }
+
+        .action-card p {
+            color: var(--text-purple);
+            margin: 0;
+        }
+
+        .overview-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .overview-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+        }
+
+        .overview-card h3 {
+            color: var(--dark-purple);
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-purple);
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: var(--bg-purple);
+            border-radius: 4px;
+        }
+
+        .stat-label {
+            color: var(--text-purple);
+        }
+
+        .stat-value {
+            color: var(--primary-purple);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a th:href="@{/home}" class="active">Home</a>
+        <a th:href="@{/finance-calendar-journal}">Finance Calendar Journal</a>
+        <a th:href="@{/wishlist}">My Wishlist</a>
+        <a th:href="@{/spending-tracker}">Spending Tracker</a>
+        <a th:href="@{/account}">Account & Settings</a>
+        <form id="logoutForm" th:action="@{/logout}" method="post" style="display: inline;" onsubmit="return confirmLogout()">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="main-content">
+        <div class="welcome-section">
+            <h1>Welcome back, <span th:text="${firstName}">User</span>!</h1>
+            <p>Track your finances, plan your future, and achieve your goals.</p>
+        </div>
+
+        <div class="quick-actions">
+            <a th:href="@{/finance-calendar-journal}" class="action-card">
+                <h3>Finance Calendar Journal</h3>
+                <p>View and manage your financial schedule</p>
+            </a>
+            <a th:href="@{/wishlist}" class="action-card">
+                <h3>Wishlist</h3>
+                <p>Track items you want to save for</p>
+            </a>
+            <a th:href="@{/spending-tracker}" class="action-card">
+                <h3>Spending Tracker</h3>
+                <p>Monitor your expenses and budget</p>
+            </a>
+        </div>
+
+        <div class="overview-section">
+            <div class="overview-card">
+                <h3>Monthly Overview</h3>
+                <div class="stat">
+                    <span class="stat-label">Total Spending</span>
+                    <span class="stat-value">$2,450</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Savings</span>
+                    <span class="stat-value">$500</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Budget Status</span>
+                    <span class="stat-value">On Track</span>
+                </div>
+            </div>
+
+            <div class="overview-card">
+                <h3>Upcoming Events</h3>
+                <div class="stat">
+                    <span class="stat-label">Rent Payment</span>
+                    <span class="stat-value">In 5 days</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Utility Bills</span>
+                    <span class="stat-value">In 8 days</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Savings Goal</span>
+                    <span class="stat-value">80% Complete</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmLogout() {
+            return confirm('Are you sure you want to logout?');
+        }
+    </script>
+</body>
+</html> 

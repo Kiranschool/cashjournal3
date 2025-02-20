@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cash Journal - My Wishlist</title>
+    <style>
+        :root {
+            --primary-purple: #6200EA;
+            --light-purple: #B388FF;
+            --dark-purple: #4A148C;
+            --hover-purple: #7C4DFF;
+            --bg-purple: #F3E5F5;
+            --text-purple: #4A148C;
+        }
+
+        body {
+            background-color: var(--bg-purple);
+            color: var(--text-purple);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .nav-bar {
+            background-color: var(--primary-purple);
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(98, 0, 234, 0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-bar a:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .nav-bar a.active {
+            background-color: var(--dark-purple);
+        }
+
+        .logout-btn {
+            float: right;
+            background-color: var(--dark-purple);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #7B1FA2;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .wishlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .wishlist-title {
+            color: var(--dark-purple);
+            margin: 0;
+        }
+
+        .add-item-btn {
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-item-btn:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .wishlist-item {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .wishlist-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+            background-color: var(--bg-purple);
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-purple);
+        }
+
+        .item-title {
+            color: var(--dark-purple);
+            margin: 0 0 10px 0;
+        }
+
+        .item-price {
+            color: var(--primary-purple);
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        .item-priority {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .priority-high {
+            background-color: #ff4444;
+            color: white;
+        }
+
+        .priority-medium {
+            background-color: #ffbb33;
+            color: white;
+        }
+
+        .priority-low {
+            background-color: #00C851;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a th:href="@{/home}">Home</a>
+        <a th:href="@{/finance-calendar-journal}">Finance Calendar Journal</a>
+        <a th:href="@{/wishlist}" class="active">My Wishlist</a>
+        <a th:href="@{/spending-tracker}">Spending Tracker</a>
+        <a th:href="@{/account}">Account & Settings</a>
+        <form id="logoutForm" th:action="@{/logout}" method="post" style="display: inline;" onsubmit="return confirmLogout()">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="main-content">
+        <div class="wishlist-header">
+            <h2 class="wishlist-title">My Wishlist</h2>
+            <button class="add-item-btn">Add New Item</button>
+        </div>
+
+        <div class="wishlist-grid">
+            <!-- Example wishlist items -->
+            <div class="wishlist-item">
+                <div class="item-image">Image Placeholder</div>
+                <h3 class="item-title">New Laptop</h3>
+                <p class="item-price">$1,200</p>
+                <span class="item-priority priority-high">High Priority</span>
+            </div>
+
+            <div class="wishlist-item">
+                <div class="item-image">Image Placeholder</div>
+                <h3 class="item-title">Wireless Headphones</h3>
+                <p class="item-price">$299</p>
+                <span class="item-priority priority-medium">Medium Priority</span>
+            </div>
+
+            <div class="wishlist-item">
+                <div class="item-image">Image Placeholder</div>
+                <h3 class="item-title">Smart Watch</h3>
+                <p class="item-price">$399</p>
+                <span class="item-priority priority-low">Low Priority</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmLogout() {
+            return confirm('Are you sure you want to logout?');
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cash Journal - Finance Calendar Journal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6200EA;
+            --light-purple: #B388FF;
+            --dark-purple: #4A148C;
+            --hover-purple: #7C4DFF;
+            --bg-purple: #F3E5F5;
+            --text-purple: #4A148C;
+        }
+
+        body {
+            background-color: var(--bg-purple);
+            color: var(--text-purple);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .nav-bar {
+            background-color: var(--primary-purple);
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(98, 0, 234, 0.2);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-bar a:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .nav-bar a.active {
+            background-color: var(--dark-purple);
+        }
+
+        .logout-btn {
+            float: right;
+            background-color: var(--dark-purple);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #7B1FA2;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .calendar-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-title {
+            color: var(--dark-purple);
+            margin: 0;
+        }
+
+        .calendar-controls button {
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .calendar-controls button:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-purple);
+            padding: 10px;
+        }
+
+        .calendar-day {
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid var(--light-purple);
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .calendar-day.empty {
+            background-color: var(--bg-purple);
+            border: none;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary-purple);
+        }
+
+        .day-number {
+            font-weight: bold;
+            color: var(--text-purple);
+            margin-bottom: 5px;
+        }
+
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .transaction-item {
+            font-size: 0.8em;
+            padding: 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .transaction-item:hover {
+            transform: scale(1.05);
+        }
+
+        .transaction-item.expense {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .transaction-item.income {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .transaction-amount {
+            font-weight: bold;
+        }
+
+        .transaction-purpose {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .event-list {
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+        }
+
+        .event-list h3 {
+            color: var(--dark-purple);
+            margin-top: 0;
+        }
+
+
+        .journal-entry {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--bg-purple);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .journal-entry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(98, 0, 234, 0.15);
+        }
+
+        .journal-entry h4 {
+            color: var(--dark-purple);
+            margin: 0 0 10px 0;
+        }
+
+        .journal-entry p {
+            margin: 0;
+            color: var(--text-purple);
+        }
+
+        .add-entry-btn {
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .add-entry-btn:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .balance-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(98, 0, 234, 0.1);
+        }
+
+        .balance-amount {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--primary-purple);
+            margin: 10px 0;
+        }
+
+        .balance-label {
+            color: var(--text-purple);
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .transaction-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .add-expense-btn, .add-income-btn {
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-expense-btn {
+            background-color: #dc3545;
+        }
+
+        .add-expense-btn:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .add-income-btn {
+            background-color: #28a745;
+        }
+
+        .add-income-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 20px auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: sticky;
+            top: 0;
+            right: 15px;
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-purple);
+            transition: color 0.3s ease;
+            background-color: white;
+            padding: 5px;
+            z-index: 1;
+            margin-bottom: 10px;
+        }
+
+        .close-modal:hover {
+            color: var(--primary-purple);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-purple);
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--light-purple);
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .image-upload {
+            border: 2px dashed var(--light-purple);
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .image-upload:hover {
+            border-color: var(--primary-purple);
+            background-color: var(--bg-purple);
+        }
+
+        .submit-btn {
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--hover-purple);
+        }
+
+        @media (max-height: 600px) {
+            .modal-content {
+                margin: 10px auto;
+            }
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            width: 50%;
+            border: none;
+            color: white;
+        }
+
+        .button-group .submit-btn {
+            background-color: var(--primary-purple);
+            margin: 0;
+            width: 50%;
+        }
+
+        .button-group .submit-btn:hover {
+            background-color: var(--hover-purple);
+        }
+
+        .button-group .delete-btn {
+            background-color: #dc3545;
+            width: 50%;
+        }
+
+        .button-group .delete-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a th:href="@{/home}">Home</a>
+        <a th:href="@{/finance-calendar-journal}" class="active">Finance Calendar Journal</a>
+        <a th:href="@{/wishlist}">My Wishlist</a>
+        <a th:href="@{/spending-tracker}">Spending Tracker</a>
+        <a th:href="@{/account}">Account & Settings</a>
+        <form id="logoutForm" th:action="@{/logout}" method="post" style="display: inline;" onsubmit="return confirmLogout()">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="main-content">
+        <div class="balance-section">
+            <div class="balance-label">Current Balance</div>
+            <div class="balance-amount" th:text="${'$' + #numbers.formatDecimal(balance, 0, 'COMMA', 2, 'POINT')}">$0.00</div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h2 class="calendar-title">Finance Calendar Journal</h2>
+                <div class="calendar-controls">
+                    <button onclick="previousMonth()">Previous Month</button>
+                    <button onclick="today()">Today</button>
+                    <button onclick="nextMonth()">Next Month</button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="transaction-buttons">
+            <button class="add-expense-btn" onclick="openExpenseModal()">
+                <i class="fas fa-minus-circle"></i> Add Expense
+            </button>
+            <button class="add-income-btn" onclick="openIncomeModal()">
+                <i class="fas fa-plus-circle"></i> Add Income
+            </button>
+        </div>
+
+        <!-- Expense Modal -->
+        <div id="expenseModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeExpenseModal()">&times;</span>
+                <h2>Add Expense</h2>
+                <form id="expenseForm" onsubmit="submitExpense(event)">
+                    <div class="form-group">
+                        <label for="expenseAmount">Amount Spent ($)</label>
+                        <input type="number" id="expenseAmount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expensePurpose">Purpose of Spending</label>
+                        <input type="text" id="expensePurpose" name="purpose" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseDate">Date of Spending</label>
+                        <input type="date" id="expenseDate" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseReflection">Reflection</label>
+                        <textarea id="expenseReflection" name="reflection" placeholder="Write your thoughts about this expense..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Attachments</label>
+                        <div class="image-upload" onclick="document.getElementById('expenseImage').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload images</p>
+                            <input type="file" id="expenseImage" accept="image/*" style="display: none" multiple>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">Submit Expense</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Income Modal -->
+        <div id="incomeModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeIncomeModal()">&times;</span>
+                <h2>Add Income</h2>
+                <form id="incomeForm" onsubmit="submitIncome(event)">
+                    <div class="form-group">
+                        <label for="incomeAmount">Amount Earned ($)</label>
+                        <input type="number" id="incomeAmount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="incomeSource">Source of Income</label>
+                        <input type="text" id="incomeSource" name="source" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="incomeDate">Date of Income</label>
+                        <input type="date" id="incomeDate" name="date" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Submit Income</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add this new modal before the closing body tag -->
+    <div id="viewTransactionModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeViewTransactionModal()">&times;</span>
+            <h2 id="transactionModalTitle">Transaction Details</h2>
+            <form id="viewTransactionForm" onsubmit="updateTransaction(event)">
+                <input type="hidden" id="transactionId">
+                <input type="hidden" id="transactionType">
+                <div class="form-group">
+                    <label for="viewAmount">Amount ($)</label>
+                    <input type="number" id="viewAmount" name="amount" step="0.01" required>
+                </div>
+                <div id="viewPurposeGroup" class="form-group">
+                    <label for="viewPurpose">Purpose</label>
+                    <input type="text" id="viewPurpose" name="purpose" required>
+                </div>
+                <div id="viewSourceGroup" class="form-group" style="display: none;">
+                    <label for="viewSource">Source</label>
+                    <input type="text" id="viewSource" name="source" required>
+                </div>
+                <div class="form-group">
+                    <label for="viewDate">Date</label>
+                    <input type="date" id="viewDate" name="date" required>
+                </div>
+                <div id="viewReflectionGroup" class="form-group">
+                    <label for="viewReflection">Reflection</label>
+                    <textarea id="viewReflection" name="reflection" placeholder="Write your thoughts about this transaction..."></textarea>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="submit-btn">Update Transaction</button>
+                    <button type="button" class="delete-btn" onclick="deleteTransaction()">Delete Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // Get transactions from Thymeleaf model
+        const transactions = /*[[${transactions}]]*/ [];
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+
+            // Add day headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+
+            // Get first day of month and total days
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const totalDays = lastDay.getDate();
+            const startingDay = firstDay.getDay();
+
+            // Add empty cells for days before start of month
+            for (let i = 0; i < startingDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // Add days with transactions
+            for (let day = 1; day <= totalDays; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                
+                // Check if this is today
+                const currentDateStr = new Date().toDateString();
+                const thisDayStr = new Date(currentYear, currentMonth, day).toDateString();
+                if (currentDateStr === thisDayStr) {
+                    dayCell.classList.add('today');
+                }
+
+                // Add day number
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                dayCell.appendChild(dayNumber);
+
+                // Find transactions for this day
+                const dayTransactions = transactions.filter(t => {
+                    const transDate = new Date(t.date);
+                    return transDate.getDate() === day && 
+                           transDate.getMonth() === currentMonth && 
+                           transDate.getFullYear() === currentYear;
+                });
+
+                // Add transaction indicators
+                if (dayTransactions.length > 0) {
+                    const transactionList = document.createElement('div');
+                    transactionList.className = 'transaction-list';
+                    
+                    dayTransactions.forEach(transaction => {
+                        const transactionItem = document.createElement('div');
+                        transactionItem.className = `transaction-item ${transaction.type.toLowerCase()}`;
+                        const amount = new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD'
+                        }).format(Math.abs(transaction.amount));
+                        
+                        transactionItem.innerHTML = `
+                            <span class="transaction-amount">${amount}</span>
+                            <span class="transaction-purpose">${transaction.type === 'EXPENSE' ? transaction.purpose : transaction.source}</span>
+                        `;
+                        
+                        // Add click event to show transaction details
+                        transactionItem.addEventListener('click', () => showTransactionDetails(transaction));
+                        
+                        transactionList.appendChild(transactionItem);
+                    });
+                    
+                    dayCell.appendChild(transactionList);
+                }
+
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            generateCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar();
+        }
+
+        function today() {
+            currentMonth = new Date().getMonth();
+            currentYear = new Date().getFullYear();
+            generateCalendar();
+        }
+
+        function showTransactionDetails(transaction) {
+            const modal = document.getElementById('viewTransactionModal');
+            const title = document.getElementById('transactionModalTitle');
+            const form = document.getElementById('viewTransactionForm');
+            const purposeGroup = document.getElementById('viewPurposeGroup');
+            const sourceGroup = document.getElementById('viewSourceGroup');
+            const reflectionGroup = document.getElementById('viewReflectionGroup');
+
+            // Set transaction type and ID
+            document.getElementById('transactionId').value = transaction.id;
+            document.getElementById('transactionType').value = transaction.type;
+
+            // Set title based on transaction type
+            title.textContent = transaction.type === 'EXPENSE' ? 'Expense Details' : 'Income Details';
+
+            // Set form values
+            document.getElementById('viewAmount').value = Math.abs(transaction.amount);
+            document.getElementById('viewDate').value = transaction.date.split('T')[0];
+
+            // Show/hide fields based on transaction type
+            if (transaction.type === 'EXPENSE') {
+                purposeGroup.style.display = 'block';
+                sourceGroup.style.display = 'none';
+                reflectionGroup.style.display = 'block';
+                document.getElementById('viewPurpose').value = transaction.purpose;
+                document.getElementById('viewReflection').value = transaction.reflection || '';
+            } else {
+                purposeGroup.style.display = 'none';
+                sourceGroup.style.display = 'block';
+                reflectionGroup.style.display = 'none';
+                document.getElementById('viewSource').value = transaction.source;
+            }
+
+            modal.style.display = 'block';
+        }
+
+        function closeViewTransactionModal() {
+            const modal = document.getElementById('viewTransactionModal');
+            modal.style.display = 'none';
+        }
+
+        async function updateTransaction(event) {
+            event.preventDefault();
+            
+            const transactionId = document.getElementById('transactionId').value;
+            const transactionType = document.getElementById('transactionType').value;
+            
+            const formData = {
+                id: transactionId,
+                amount: document.getElementById('viewAmount').value,
+                date: document.getElementById('viewDate').value
+            };
+
+            if (transactionType === 'EXPENSE') {
+                formData.purpose = document.getElementById('viewPurpose').value;
+                formData.reflection = document.getElementById('viewReflection').value;
+            } else {
+                formData.source = document.getElementById('viewSource').value;
+            }
+
+            try {
+                const response = await fetch(`/api/transactions/${transactionId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Update the balance display
+                    const balanceAmount = document.querySelector('.balance-amount');
+                    balanceAmount.textContent = new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                    }).format(data.newBalance);
+
+                    // Update the transaction in the transactions array
+                    const index = transactions.findIndex(t => t.id === transactionId);
+                    if (index !== -1) {
+                        transactions[index] = data.transaction;
+                    }
+                    
+                    // Regenerate the calendar to show the updated transaction
+                    generateCalendar();
+                    
+                    // Close the modal
+                    closeViewTransactionModal();
+                } else {
+                    alert(data.error || 'Failed to update transaction');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the transaction');
+            }
+        }
+
+        async function deleteTransaction() {
+            if (!confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
+                return;
+            }
+
+            const transactionId = document.getElementById('transactionId').value;
+
+            try {
+                const response = await fetch(`/api/transactions/${transactionId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Update the balance display
+                    const balanceAmount = document.querySelector('.balance-amount');
+                    balanceAmount.textContent = new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                    }).format(data.newBalance);
+
+                    // Remove the transaction from the transactions array
+                    const index = transactions.findIndex(t => t.id === transactionId);
+                    if (index !== -1) {
+                        transactions.splice(index, 1);
+                    }
+                    
+                    // Regenerate the calendar to reflect the deletion
+                    generateCalendar();
+                    
+                    // Close the modal
+                    closeViewTransactionModal();
+                } else {
+                    alert(data.error || 'Failed to delete transaction');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the transaction');
+            }
+        }
+
+        // Modal functions
+        function openExpenseModal() {
+            const modal = document.getElementById('expenseModal');
+            modal.style.display = 'block';
+            document.getElementById('expenseDate').valueAsDate = new Date();
+        }
+
+        function closeExpenseModal() {
+            const modal = document.getElementById('expenseModal');
+            modal.style.display = 'none';
+        }
+
+        function openIncomeModal() {
+            const modal = document.getElementById('incomeModal');
+            modal.style.display = 'block';
+            document.getElementById('incomeDate').valueAsDate = new Date();
+        }
+
+        function closeIncomeModal() {
+            const modal = document.getElementById('incomeModal');
+            modal.style.display = 'none';
+        }
+
+        async function submitExpense(event) {
+            event.preventDefault();
+            
+            const formData = {
+                amount: document.getElementById('expenseAmount').value,
+                purpose: document.getElementById('expensePurpose').value,
+                date: document.getElementById('expenseDate').value,
+                reflection: document.getElementById('expenseReflection').value,
+                imageUrls: [] // Initialize as empty array
+            };
+
+            // Handle file uploads if implemented
+            const fileInput = document.getElementById('expenseImage');
+            if (fileInput && fileInput.files.length > 0) {
+                // TODO: Implement file upload logic here
+                // For now, we'll just keep the imageUrls array empty
+            }
+
+            try {
+                const response = await fetch('/api/transactions/expense', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Update the balance display
+                    const balanceAmount = document.querySelector('.balance-amount');
+                    balanceAmount.textContent = new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                    }).format(data.newBalance);
+
+                    // Add the new transaction to the transactions array
+                    transactions.push(data.transaction);
+                    
+                    // Regenerate the calendar to show the new transaction
+                    generateCalendar();
+                    
+                    // Close the modal and reset form
+                    closeExpenseModal();
+                    document.getElementById('expenseForm').reset();
+                } else {
+                    alert(data.error || 'Failed to add expense');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while adding the expense');
+            }
+        }
+
+        async function submitIncome(event) {
+            event.preventDefault();
+            
+            const formData = {
+                amount: document.getElementById('incomeAmount').value,
+                source: document.getElementById('incomeSource').value,
+                date: document.getElementById('incomeDate').value
+            };
+
+            try {
+                const response = await fetch('/api/transactions/income', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Update the balance display
+                    const balanceAmount = document.querySelector('.balance-amount');
+                    balanceAmount.textContent = new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                    }).format(data.newBalance);
+
+                    // Add the new transaction to the transactions array
+                    transactions.push(data.transaction);
+                    
+                    // Regenerate the calendar to show the new transaction
+                    generateCalendar();
+                    
+                    // Close the modal and reset form
+                    closeIncomeModal();
+                    document.getElementById('incomeForm').reset();
+                } else {
+                    alert(data.error || 'Failed to add income');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while adding the income');
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const expenseModal = document.getElementById('expenseModal');
+            const incomeModal = document.getElementById('incomeModal');
+            const viewTransactionModal = document.getElementById('viewTransactionModal');
+            if (event.target === expenseModal) {
+                closeExpenseModal();
+            }
+            if (event.target === incomeModal) {
+                closeIncomeModal();
+            }
+            if (event.target === viewTransactionModal) {
+                closeViewTransactionModal();
+            }
+        }
+
+        // Initialize calendar on page load
+        document.addEventListener('DOMContentLoaded', generateCalendar);
+
+        function confirmLogout() {
+            return confirm('Are you sure you want to logout?');
+        }
+    </script>
+</body>
+</html> 
